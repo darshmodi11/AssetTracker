@@ -1,0 +1,37 @@
+{% load static %}
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <!--begin::Sidebar Brand-->
+    <div class="sidebar-brand"> <!--begin::Brand Link--> <a
+            href="{% url 'asset_admin:index' %}" class="brand-link">
+        <!--begin::Brand Image--> <img
+            src="{% static 'images/AdminLTELogo.png' %}" alt="AdminLTE Logo"
+            class="brand-image opacity-75 shadow"> <!--end::Brand Image-->
+        <!--begin::Brand Text--> <span
+            class="brand-text fw-light">Asset Tracker</span> <!--end::Brand Text-->
+    </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand-->
+    <!--begin::Sidebar Wrapper-->
+    <div class="sidebar-wrapper">
+        <nav class="mt-2"> <!--begin::Sidebar Menu-->
+            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="{% if request.path == '/admin_panel/'%}javascript:void(0){% else %}{% url 'asset_admin:index' %}{% endif %}" class="nav-link {% if request.path == '/admin_panel/'%}active{% endif %}"><i class="nav-icon bi bi-speedometer"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% if request.path == '/admin_panel/asset-types/'%}javascript:void(0){% else %}{% url 'asset_admin:asset_type_list' %}{% endif %}" class="nav-link {% if request.path == '/admin_panel/asset-types/'%}active{% endif %}">
+                        <i class="nav-icon bi bi-question-circle-fill"></i>
+                        <p>Manage Asset Type</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% if request.path == '/admin_panel/assets/'%}javascript:void(0){% else %}{% url 'asset_admin:asset_list' %}{% endif %}" class="nav-link {% if request.path == '/admin_panel/assets/'%}active{% endif %}">
+                        <i class="nav-icon bi bi-patch-check-fill"></i>
+                        <p>Manage Assets</p>
+                    </a>
+                </li>
+            </ul> <!--end::Sidebar Menu-->
+        </nav>
+    </div> <!--end::Sidebar Wrapper-->
+</aside> <!--end::Sidebar--> <!--begin::App Main-->
