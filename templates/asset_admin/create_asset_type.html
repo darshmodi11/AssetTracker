@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Create Asset Types{% endblock title %}
+
+{% block content %}
+    <main class="app-main"> <!--begin::App Content Header-->
+        <div class="app-content-header"> <!--begin::Container-->
+            <div class="container-fluid"> <!--begin::Row-->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="mb-0">Asset Type</h3>
+                    </div>
+                </div> <!--end::Row-->
+            </div> <!--end::Container-->
+        </div> <!--end::App Content Header--> <!--begin::App Content-->
+        <div class="app-content"> <!--begin::Container-->
+            <div class="container-fluid"> <!--begin::Row-->
+                <div class="row g-4"> <!--begin::Col-->
+                    <div class="col-md-8"> <!--begin::Quick Example-->
+                        <div class="card card-primary card-outline mb-4"> <!--begin::Header-->
+                            <div class="card-header">
+                                <div class="card-title">Create New Asset Type</div>
+                            </div> <!--end::Header--> <!--begin::Form-->
+                            <form method="post" action="{% url 'asset_admin:create_asset_type' %}">
+                                {% csrf_token %}
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="type_id" class="form-label">Asset Type</label>
+                                        <input type="text" class="form-control" name="name" id="type_id" aria-describedby="typehelp" value="{{ form.name.value|default_if_none:'' }}" required>
+                                        {% if form.errors.name %}<div class="text-danger">{{ form.errors.name }}</div>{% endif %}
+                                    </div>
+                                    <div class="mb-3"> <label for="description_id" class="form-label">Description</label>
+                                        <textarea class="form-control" name="description" id="description_id" required>{{ form.description.value|default_if_none:'' }}</textarea>
+                                        {% if form.errors.description %}<div class="text-danger">{{ form.errors.description }}</div>{% endif %}
+                                    </div>
+                                </div> <!--end::Body--> <!--begin::Footer-->
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div> <!--end::Footer-->
+                            </form>
+                        </div> <!--end::Quick Example--> <!--begin::Input Group-->
+                    </div> <!--end::Col--> <!--begin::Col-->
+                </div> <!--end::Row-->
+            </div> <!--end::Container-->
+        </div> <!--end::App Content-->
+    </main> <!--end::App Main--> <!--begin::Footer-->
+{% endblock content %}

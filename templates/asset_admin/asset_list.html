@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Assets{% endblock title %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" />
+{% endblock extra_css %}
+
+{% block content %}
+    <main class="app-main"> <!--begin::App Content Header-->
+        <div class="app-content-header"> <!--begin::Container-->
+            <div class="container-fluid"> <!--begin::Row-->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="mb-0">Asset Tracker</h3>
+                    </div>
+                    <div class="col-sm-6 text-end">
+                        <button class="btn btn-primary" onclick="location.href='{% url 'asset_admin:create_asset' %}'">Add Asset</button>
+                    </div>
+                </div> <!--end::Row-->
+            </div> <!--end::Container-->
+        </div> <!--end::App Content Header--> <!--begin::App Content-->
+        <div class="app-content"> <!--begin::Container-->
+            <div class="container-fluid"> <!--begin::Row-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Assets</h3>
+                            </div> <!-- /.card-header -->
+                            <div class="card-body">
+                                <table id="asset_type_table" class="table table-bordered display">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Code</th>
+                                            <th>Asset Type</th>
+                                            <th>Action</th>
+
+
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div> <!-- /.card-body -->
+                        </div> <!-- /.card -->
+
+                    </div> <!-- /.col -->
+                </div> <!--end::Row-->
+            </div> <!--end::Container-->
+        </div> <!--end::App Content-->
+    </main> <!--end::App Main--> <!--begin::Footer-->
+{% endblock content %}
+
+{% block extra_js %}
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#asset_type_table').DataTable({
+                pageLength: 5,
+                ordering:false,// disable ordering for all columns
+                {#columnDefs: [#}
+                {#  { orderable: false, targets: [1,2,3] }  // Disable ordering on the second to fourth columns (index starts at 0)#}
+                {#],#}
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{% url 'asset_admin:ajax_assets_list' %}",
+
+                },
+                columns: [
+                    { data: null, // for serial numbers
+                        render: function (data, type, row, meta) {
+                            // Use meta.row and meta.settings to calculate the serial number
+                            return meta.settings._iDisplayStart + meta.row + 1;
+                        },
+                    },
+                    { data: 'name' },
+                    { data: 'code' },
+                    { data: 'asset_type__name' },
+                    { data: null,
+                        render: function (data, type, row, meta) {
+                                  return `
+                                    <button class="btn btn-success" onclick="location.href='javascript:void(0)'"><i class="fa fa-edit"></i> Edit</button>
+                                    <button class="btn btn-danger" onclick="location.href='javascript:void(0)'"><i class="fa fa-trash"></i> Delete</button>`
+                                }
+                    }
+                ]
+              });
+        });
+    </script>
+{% endblock extra_js %}
