@@ -248,3 +248,23 @@ class AssetTypeUpdateView(UpdateView):
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'errors': form.errors})
         return response
+
+
+def delete_asset(request, pk):
+    if (request.headers.get('x-requested-with') == 'XMLHttpRequest'
+            and request.method == 'POST'):
+        try:
+            Asset.objects.get(pk=pk).delete()
+
+            return JsonResponse(status=200,
+                                data={
+                                    "success": True,
+                                    "message": "Asset deleted successfully."
+                                })
+
+        except AssetType.DoesNotExist:
+            return JsonResponse(status=404,
+                                data={
+                                    "success": False,
+                                    "message": "Asset does not exist."
+                                })

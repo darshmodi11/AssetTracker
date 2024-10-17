@@ -28,4 +28,6 @@ urlpatterns = [
          name='update_asset_type'),
     path('delete-asset-type/<int:pk>/', views.delete_asset_type,
          name='delete_asset_type'),
+    path('delete-asset/<int:pk>/', views.delete_asset,
+         name='delete_asset'),
 ]

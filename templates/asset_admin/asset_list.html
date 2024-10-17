@@ -30,7 +30,7 @@
                                 <h3 class="card-title">Assets</h3>
                             </div> <!-- /.card-header -->
                             <div class="card-body">
-                                <table id="asset_type_table" class="table table-bordered display">
+                                <table id="asset_table" class="table table-bordered display">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -51,6 +51,30 @@
             </div> <!--end::Container-->
         </div> <!--end::App Content-->
     </main> <!--end::App Main--> <!--begin::Footer-->
+    <!-- Delete warning model -->
+    <div class="modal fade" id="delete_asset_modal"
+         data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="delete_modal_title">Delete Asset Type</h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="id_delete_warning_block">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">No
+                    </button>
+                    <button type="button" class="btn btn-danger" id="asset_delete_btn_id">Yes, Delete it
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 {% endblock content %}
 
 {% block extra_js %}
@@ -60,7 +84,7 @@
     <script type="text/javascript" src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
     <script>
         $(document).ready(function() {
-            $('#asset_type_table').DataTable({
+            $('#asset_table').DataTable({
                 pageLength: 5,
                 ordering:false,// disable ordering for all columns
                 {#columnDefs: [#}
@@ -84,13 +108,36 @@
                     { data: 'asset_type__name' },
                     { data: null,
                         render: function (data, type, row, meta) {
-                                  return `
-                                    <button class="btn btn-success" onclick="location.href='javascript:void(0)'"><i class="fa fa-edit"></i> Edit</button>
-                                    <button class="btn btn-danger" onclick="location.href='javascript:void(0)'"><i class="fa fa-trash"></i> Delete</button>`
-                                }
+                            let delete_url = "{% url 'asset_admin:delete_asset' 0 %}"
+                            let final_delete_url = delete_url.replace('0', data.id)
+
+                            return `
+                                <button class="btn btn-success" onclick="location.href='javascript:void(0)'"><i class="fa fa-edit"></i> Edit</button>
+                                <button class="btn btn-danger" data-url=${final_delete_url} data-name='${row.name}' onclick="OpenDeleteWarningModal(this)"><i class="fa fa-trash"></i> Delete</button>`
+                        }
                     }
                 ]
               });
+        });
+
+        function OpenDeleteWarningModal(element){
+            $('#asset_delete_btn_id').attr({'data-delete-url': $(element).attr('data-url'), 'disabled': false});
+            $('#id_delete_warning_block').html(`<p>Are you sure, Do you really want to delete <b>${$(element).attr('data-name')}</b> ?`);
+            $('#delete_asset_modal').modal('show');
+
+        }
+
+        $('#asset_delete_btn_id').on('click', function(e){
+            $(this).attr('disabled', true);
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr("data-delete-url"),
+                headers: {"X-CSRFToken": '{{csrf_token}}'},
+                success: function (response) {
+                    $('#asset_table').DataTable().ajax.reload(null, false);
+                     $('#delete_asset_modal').modal('hide');
+                }
+            });
         });
     </script>
 {% endblock extra_js %}
