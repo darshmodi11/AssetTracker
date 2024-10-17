@@ -37,8 +37,6 @@
                                             <th>Type</th>
                                             <th>Description</th>
                                             <th>Action</th>
-
-
                                         </tr>
                                     </thead>
                                 </table>
@@ -50,6 +48,64 @@
             </div> <!--end::Container-->
         </div> <!--end::App Content-->
     </main> <!--end::App Main--> <!--begin::Footer-->
+    <!--Edit Modal -->
+    <div class="modal fade" id="edit_asset_type_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="edit_modal_title">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="id_edit_modal_body">
+            <form id="update_form_id" method="post">
+                <div class="mb-3">
+                    <label for="name" class="col-form-label">Asset Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" value="">
+                    <p id="error_name"></p>
+                </div>
+                <div class="mb-3">
+                    <label for="message-text" class="col-form-label">Description:</label>
+                    <textarea class="form-control" id="id_description" name="description" value=""></textarea>
+                    <p id="error_description"></p>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" id="id_edit_submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+            <div class="modal-footer mb-3 justify-content-start" id="response_msg_block_id">
+                    <p></p>
+              </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- Delete warning model -->
+    <div class="modal fade" id="delete_asset_type_modal"
+         data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="delete_modal_title">Delete Asset Type</h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="id_delete_modal_body">
+                    <p>Are you sure? If you delete this asset type, all assets
+                        under this asset type will be deleted too!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">No
+                    </button>
+                    <button type="button" class="btn btn-danger" id="asset_type_delete_btn_id">Yes, Delete it
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 {% endblock content %}
 
 {% block extra_js %}
@@ -82,13 +138,91 @@
                     { data: 'description' },
                     { data: null,
                         render: function (data, type, row, meta) {
-                                  return `
-                                    <button class="btn btn-success" onclick="location.href='javascript:void(0)'"><i class="fa fa-edit"></i> Edit</button>
-                                    <button class="btn btn-danger" onclick="location.href='javascript:void(0)'"><i class="fa fa-trash"></i> Delete</button>`
-                                }
+                            let edit_url = "{% url 'asset_admin:asset_type_detail' 0 %}"
+                            let final_edit_url = edit_url.replace('0', data.id)
+                            let delete_url = "{% url 'asset_admin:delete_asset_type' 0 %}"
+                            let final_delete_url = delete_url.replace('0', data.id)
+                            return `
+                            <button class="btn btn-success" data-url=${final_edit_url} onclick="OpenEditModal(this)"><i class="fa fa-edit"></i> Edit</button>
+                            <button class="btn btn-danger" data-url=${final_delete_url} onclick="OpenDeleteWarningModal(this)"><i class="fa fa-trash"></i> Delete</button>`
+                        }
                     }
                 ]
               });
         });
+
+        function OpenEditModal(element){
+            $.ajax({
+                type: 'GET',
+                url: $(element).attr("data-url"),
+                success: function (response) {
+                    let response_data = response.data;
+                    let edit_submit_url ="{% url 'asset_admin:update_asset_type' 0 %}"
+                    let final_edit_submit_url = edit_submit_url.replace('0', response_data.id)
+                    $('#edit_modal_title').text("Edit Asset Type");
+                    $('#id_edit_modal_body #name').val(response_data.name);
+                    $('#id_edit_modal_body #id_description').val(response_data.description);
+                    $('#id_edit_modal_body #id_description').text(response_data.description);
+                    $('#id_edit_submit').attr('data-url', final_edit_submit_url);
+                    $('#error_name, #error_description').text('');
+                    $('#edit_asset_type_modal').modal('show');
+                }
+            });
+        }
+
+        $('#update_form_id').on('submit', function (e) {
+            e.preventDefault();
+            $('#error_name, #error_description').text('');
+            $.ajax({
+                type: 'POST',
+                headers: {"X-CSRFToken": '{{csrf_token}}'},
+                data: $('#update_form_id').serializeArray(),
+                url: $('#id_edit_submit').attr("data-url"),
+                success: function (response) {
+                    if(response.success){
+                        $('#response_msg_block_id p').addClass('text-success');
+                        $('#response_msg_block_id p').text(response.message);
+                        $('#edit_asset_type_modal').fadeOut(1500, function() {
+                            $(this).modal('hide');
+                            $('#response_msg_block_id p').removeClass('text-success');
+                            $('#response_msg_block_id p').text('');
+                        });
+                        $('#asset_type_table').DataTable().ajax.reload(null, false);
+                    }
+                    else{
+                        if (response.errors.name){
+                            $('#error_name').addClass('text-danger').text(response.errors.name);
+                        }
+                        if (response.errors.description){
+                            $('#error_description').addClass('text-danger').text(response.errors.description);
+                        }
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown){
+                }
+            });
+        })
+
+
+        function OpenDeleteWarningModal(element){
+            $('#asset_type_delete_btn_id').attr({'data-delete-url': $(element).attr('data-url'), 'disabled': false});
+            $('#delete_asset_type_modal').modal('show');
+
+        }
+
+        $('#asset_type_delete_btn_id').on('click', function(e){
+            $(this).attr('disabled', true);
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr("data-delete-url"),
+                headers: {"X-CSRFToken": '{{csrf_token}}'},
+                success: function (response) {
+                    $('#asset_type_table').DataTable().ajax.reload(null, false);
+                     $('#delete_asset_type_modal').modal('hide');
+                }
+            });
+        });
+
+
     </script>
 {% endblock extra_js %}
