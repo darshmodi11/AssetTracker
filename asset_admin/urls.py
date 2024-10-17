@@ -22,4 +22,10 @@ urlpatterns = [
     path('assets-list/', views.get_assets, name='ajax_assets_list'),
     path('create-asset/', views.CreateAssetView.as_view(),
          name="create_asset"),
+    path('asset-type-details/<int:pk>/', views.get_asset_type_detail,
+         name='asset_type_detail'),
+    path('update-asset-type/<int:pk>/', views.AssetTypeUpdateView.as_view(),
+         name='update_asset_type'),
+    path('delete-asset-type/<int:pk>/', views.delete_asset_type,
+         name='delete_asset_type'),
 ]
